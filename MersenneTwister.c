@@ -59,7 +59,7 @@ int extract_number() {
      }
  
      int y = MT[indx];
-     y ^= ((y >> u));
+     y ^= ((y >> u) & d);
      y ^= ((y << s) & TEMPERING_MASK_B);
      y ^= ((y << t) & TEMPERING_MASK_C);
      y ^= (y >> l);
@@ -74,6 +74,6 @@ int main(int argc, char **argv)
 {
 	seed_mt(1337);
 	for(int i=0; i<100; i++) {
-    printf("%f\n", extract_number());
+    printf("%d\n", extract_number());
   }
 }
