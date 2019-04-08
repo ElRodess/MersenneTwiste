@@ -12,4 +12,4 @@
 void twist();
 void seed_mt(int seed);
 u_int32_t extract_number();
-#endif /* #ifndef __include_fichier_h__ */
+#endif 
