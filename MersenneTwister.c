@@ -2,8 +2,6 @@
 // Create a length n array to store the state of the generator
 
  // Initialize the generator from a seed
- u_int32_t MT[624] = {0};
-u_int32_t indx = 0;
   // Generate the next n values from the series x_i 
  void twist() {
      for(int i=0;i<624;i++){
@@ -17,7 +15,7 @@ u_int32_t indx = 0;
  
  void seed_mt(int seed) {
      int i;
-     indx = 0 ;
+     indx = 0 ; 
      MT[0] = seed & 0xffffffff;
      for(i=1;i<624;i++) { // loop over each element
          MT[i] = (0x6c078965 * (MT[i-1] ^ (MT[i-1] >> (32-2))) + i) & 0xffffffff;

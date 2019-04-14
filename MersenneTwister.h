@@ -8,7 +8,8 @@
 #define LOWER_MASK		0x7fffffff
 #define TEMPERING_MASK_B	0x9d2c5680 
 #define TEMPERING_MASK_C	0xefc60000
-
+u_int32_t MT[624];
+u_int32_t indx;
 
 void twist();
 void seed_mt(int seed);

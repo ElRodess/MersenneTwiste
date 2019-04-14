@@ -12,7 +12,7 @@ $(EXEC) : $(OBJ)
 	
 
 #Compilation des .c
-Main.o : MersenneTwister.h CrackSeed.h
+Main.o : MersenneTwister.h CrackSeed.h Unshift.h
 
 %.o : %.c def.h
 	@gcc $(CFLAGS) -o $@ -c $< 
