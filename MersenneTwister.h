@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <unistd.h>
 #define __include_MersenneTwister_h__
 #define UPPER_MASK		0x80000000
 #define LOWER_MASK		0x7fffffff
