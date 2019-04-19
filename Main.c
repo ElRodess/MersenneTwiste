@@ -69,7 +69,58 @@ char* append(char* txt, char* c)
 	return tmp;
 }
 
-char* AttaqueUnshift(Cyphertext cypher)
+u_int16_t routineV2(u_int32_t val,int k)
+{
+	//printf("V1 :  %u |V2 : %u \n",val1,val2);
+	u_int16_t seed= 0;
+	u_int32_t try = 0;
+	int i = 0;
+	while(try != val)
+	{			
+		usleep(rand()%1000000 +40000);
+		seed = time(NULL);
+		seed_mt(seed);
+		for(i=0;i<k;i++)
+			printf("%u || ",extract_number());
+		try = extract_number();
+		printf("seed = %u : %u\n",seed,try);
+	}
+	return seed;
+}
+
+
+u_int16_t AttaqueForceSeed(Cyphertext cypher,int taille_clair)
+{
+	taille_clair = taille_clair -14; // on enleve ceux dont on connait la valeur
+	int tmp = taille_clair %4;
+	int pos = 0; int i;
+	u_int32_t val = 0; u_int16_t seed = 0;
+	switch (tmp){ // cherche le debut d'une valeur craquable
+		case 0 :
+			pos = taille_clair + 4;
+			break;
+		case 1 :
+			pos = taille_clair + 3;
+			break;
+		case 2 :
+			pos = taille_clair + 2;
+			break;
+		case 3:
+			pos = taille_clair + 1;
+			break;
+	}
+	for(i = 0;i<4;i++)
+	{
+		val = val << 8 ;
+		val = val | (cypher.cypher[pos + i] ^ 0x41);
+		printf("val it: %d = %u \n",i,val);
+	}
+	//val ^= 0x41414141;// val de AAAA;
+	seed = routineV2(val,pos/4);
+	return seed;
+}
+
+char* AttaqueUnshift(Cyphertext cypher) // A debuguer
 {
 	int i,j,k;
 	u_int32_t XorVal[624];
@@ -78,10 +129,10 @@ char* AttaqueUnshift(Cyphertext cypher)
 	j= 0;
 	for(i=0;i<(624*4);i+=4)
 	{
-		tmp[0] = cypher.cypher[i] ^ 'A';
-		tmp[1] = cypher.cypher[i+1] ^ 'A';
-		tmp[2] = cypher.cypher[i+2] ^ 'A';
-		tmp[3] = cypher.cypher[i+3] ^ 'A';
+		tmp[0] = cypher.cypher[i] ^ 0x41;
+		tmp[1] = cypher.cypher[i+1] ^ 0x41;
+		tmp[2] = cypher.cypher[i+2] ^ 0x41;
+		tmp[3] = cypher.cypher[i+3] ^ 0x41;
 		XorVal[j] = tmp[0] ;
 		for(k =1;k<3;k++)
 		{
@@ -90,6 +141,7 @@ char* AttaqueUnshift(Cyphertext cypher)
 		}
 		j++;
 	}
+	printf("%x \n",XorVal[j]);
 	for(i=0; i <624;i++)
 	{
 		MT[i] = untemper(XorVal[i]);
@@ -117,16 +169,19 @@ char* AttaqueUnshift(Cyphertext cypher)
 
 int main(int argc, char **argv)
 {
-	int i = 0;
+	//~ int i = 0;
 	char* clear_text = "salut";
-	char* A = "";
-	for(i =0;i<624;i++)
-		A = append(A,"AAAA");
-	clear_text = append(A,clear_text);
-	u_int16_t seed = 123;
+	char* A = "AAAAAAAAAAAAAA";
+	//~ for(i =0;i<624;i++)
+		//~ A = append(A,"AAAA");
+	clear_text = append(clear_text,A);
+	u_int16_t seed = time(NULL) + 5;
 	Cyphertext Cypher = encrypt(clear_text,seed);
-	 printf("%s \n",AttaqueUnshift(Cypher));
-	
+	 //~ printf("%s \n",AttaqueUnshift(Cypher));
+	printf("key = %u \n",seed);
+	printf("longueur : %d \n",strlen(clear_text));
+	u_int16_t cracked_key = AttaqueForceSeed(Cypher,strlen(clear_text)-1);
+	printf("%x \n","AAAA");
 }
 
   
