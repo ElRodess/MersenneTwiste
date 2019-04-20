@@ -63,7 +63,7 @@ void UnShift()
 	u_int32_t M[501];
 	for(i=0; i <501;i++)
 		M[i] = untemper(rng[i]);
-	for (i=1;i<501;i++)
+	for (i=0;i<501;i++)
 	{
 		indx =i;
 		MT[i] = M[i];

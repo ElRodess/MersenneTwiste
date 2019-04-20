@@ -69,6 +69,17 @@ char* append(char* txt, char* c)
 	return tmp;
 }
 
+void affichebin(u_int32_t n)
+{
+	unsigned bit = 0 ;
+	unsigned mask = 1 ;
+	for (int i = 0 ; i < 32 ; ++i)
+	{
+		bit = (n & mask) >> i ;
+		printf("%d", bit) ;
+		mask <<= 1 ;
+	}
+}
 u_int16_t routineV2(u_int32_t val,int k)
 {
 	//printf("V1 :  %u |V2 : %u \n",val1,val2);
@@ -109,11 +120,13 @@ u_int16_t AttaqueForceSeed(Cyphertext cypher,int taille_clair)
 			pos = taille_clair + 1;
 			break;
 	}
-	for(i = 0;i<4;i++)
+	for(i = 3;i>=0;i--)
 	{
 		val = val << 8 ;
 		val = val | (cypher.cypher[pos + i] ^ 0x41);
 		printf("val it: %d = %u \n",i,val);
+		affichebin(val);
+		printf("\n");
 	}
 	//val ^= 0x41414141;// val de AAAA;
 	seed = routineV2(val,pos/4);
@@ -123,37 +136,36 @@ u_int16_t AttaqueForceSeed(Cyphertext cypher,int taille_clair)
 char* AttaqueUnshift(Cyphertext cypher) // A debuguer
 {
 	int i,j,k;
-	u_int32_t XorVal[624];
+	u_int32_t XorVal[624] ;
 	u_int8_t tmp[4];
-	char* temp[4];
+	u_int32_t M[624];
 	j= 0;
-	for(i=0;i<(624*4);i+=4)
+	for(i=0;i<(2496);i=i + 4) // 624 * 4
 	{
-		tmp[0] = cypher.cypher[i] ^ 0x41;
-		tmp[1] = cypher.cypher[i+1] ^ 0x41;
-		tmp[2] = cypher.cypher[i+2] ^ 0x41;
-		tmp[3] = cypher.cypher[i+3] ^ 0x41;
-		XorVal[j] = tmp[0] ;
-		for(k =1;k<3;k++)
+		XorVal[j] =  0;
+		for(k = 3;k>=0;k--)
 		{
-			XorVal[j] = XorVal[j]<< 8;
-			XorVal[j] = XorVal[j] | tmp[k];
+			XorVal[j] = XorVal[j] << 8 ;
+			XorVal[j] = XorVal[j] | (cypher.cypher[i + k] ^ 0x41);		
 		}
+		//~ affichebin(XorVal[j]);printf("\n");
+		//~ printf("Xorval[%d] = %u \n",j,XorVal[j]);	
 		j++;
 	}
-	printf("%x \n",XorVal[j]);
 	for(i=0; i <624;i++)
 	{
-		MT[i] = untemper(XorVal[i]);
+		M[i] = untemper(XorVal[i]);
+		//~ printf("M[%d] = %u \n",i,M[i]);
 	}
 	indx = 1;
 	char* clear_text = malloc((cypher.size + 1) * sizeof(char));
 	u_int8_t bytes[4];
 	u_int32_t out_MT;
-	for(i = 1; i < cypher.size; i++){
+	for(i = 0; i < cypher.size; i++){
 		if(i % 4 == 0){
+			MT[i%4] = M[i%4];
 			out_MT = extract_number();
-			//~ printf("%x \n", out_MT);
+			//printf("%x \n", out_MT);
 			bytes[3] = (out_MT >> 24) & 0xFF;
 			bytes[2] = (out_MT >> 16) & 0xFF;
 			bytes[1] = (out_MT >> 8) & 0xFF;
@@ -167,21 +179,22 @@ char* AttaqueUnshift(Cyphertext cypher) // A debuguer
 
 
 
+
 int main(int argc, char **argv)
 {
-	//~ int i = 0;
-	char* clear_text = "salut";
-	char* A = "AAAAAAAAAAAAAA";
-	//~ for(i =0;i<624;i++)
-		//~ A = append(A,"AAAA");
-	clear_text = append(clear_text,A);
-	u_int16_t seed = time(NULL) + 5;
+	int i = 0;
+	char* clear_text = "salut"; //text inconnu "random"
+	char* A ="AAAA"; //"AAAAAAAAAAAAAA";
+	for(i =0;i<623;i++)
+		A = append(A,"AAAA");
+	clear_text = append(A,clear_text);
+	//~ printf("txt : \n %s \n",clear_text);
+	u_int16_t seed = time(NULL) + 10; // random de cette manière pour accelerer les choses
 	Cyphertext Cypher = encrypt(clear_text,seed);
-	 //~ printf("%s \n",AttaqueUnshift(Cypher));
-	printf("key = %u \n",seed);
-	printf("longueur : %d \n",strlen(clear_text));
-	u_int16_t cracked_key = AttaqueForceSeed(Cypher,strlen(clear_text)-1);
-	printf("%x \n","AAAA");
+	//~ u_int16_t cracked_key = AttaqueForceSeed(Cypher,strlen(clear_text)-1); // on force la seed 
+	//~ printf(" Message : \n %s \n",decrypt(Cypher,cracked_key));
+	printf("Message : \n %s \n", AttaqueUnshift(Cypher));;
+	
 }
 
   
