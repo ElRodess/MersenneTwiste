@@ -146,7 +146,7 @@ char* AttaqueUnshift(Cyphertext cypher) // A debuguer
 		for(k = 3;k>=0;k--)
 		{
 			XorVal[j] = XorVal[j] << 8 ;
-			XorVal[j] = XorVal[j] | (cypher.cypher[i + k] ^ 0x41);		
+			XorVal[j] = XorVal[j] | ((cypher.cypher[i+k]) ^ 0x41);		
 		}
 		//~ affichebin(XorVal[j]);printf("\n");
 		//~ printf("Xorval[%d] = %u \n",j,XorVal[j]);	
@@ -155,35 +155,39 @@ char* AttaqueUnshift(Cyphertext cypher) // A debuguer
 	for(i=0; i <624;i++)
 	{
 		M[i] = untemper(XorVal[i]);
-		//~ printf("M[%d] = %u \n",i,M[i]);
+		//printf("M[%d] = %u \n",i,M[i]);
 	}
-	indx = 1;
+	for(i=0; i <624;i++)// fix pour stabilité
+	{
+		MT[i] = M[i];
+	}
+	seed_mt(0);
 	char* clear_text = malloc((cypher.size + 1) * sizeof(char));
 	u_int8_t bytes[4];
 	u_int32_t out_MT;
 	for(i = 0; i < cypher.size; i++){
 		if(i % 4 == 0){
-			MT[i%4] = M[i%4];
+			//MT[i%4] = M[i%4];
+			indx = (i/4) % 624;
+			MT[i/4] = M[i/4];
 			out_MT = extract_number();
-			//printf("%x \n", out_MT);
+			//printf("%u \n", out_MT);
 			bytes[3] = (out_MT >> 24) & 0xFF;
 			bytes[2] = (out_MT >> 16) & 0xFF;
 			bytes[1] = (out_MT >> 8) & 0xFF;
 			bytes[0] = out_MT & 0xFF;
 		}
 		clear_text[i] = cypher.cypher[i] ^ bytes[i%4];
+		//printf("clear_text[%d] : %c \n",i,clear_text[i]);
 	}
 	clear_text[i+1] = '\0';	
 	return clear_text;
 }
 
-
-
-
 int main(int argc, char **argv)
 {
 	int i = 0;
-	char* clear_text = "salut"; //text inconnu "random"
+	char* clear_text = "SALUTCOMMENTCAVA oui oui oui"; //text inconnu "random"
 	char* A ="AAAA"; //"AAAAAAAAAAAAAA";
 	for(i =0;i<623;i++)
 		A = append(A,"AAAA");
@@ -193,7 +197,9 @@ int main(int argc, char **argv)
 	Cyphertext Cypher = encrypt(clear_text,seed);
 	//~ u_int16_t cracked_key = AttaqueForceSeed(Cypher,strlen(clear_text)-1); // on force la seed 
 	//~ printf(" Message : \n %s \n",decrypt(Cypher,cracked_key));
-	printf("Message : \n %s \n", AttaqueUnshift(Cypher));;
+	//UnShift_seed(1337); 
+	//!!! untempered bon , c'est le setup après qui bug
+	printf("Message : \n %s \n", AttaqueUnshift(Cypher));
 	
 }
 

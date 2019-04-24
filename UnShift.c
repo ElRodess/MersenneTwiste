@@ -48,7 +48,34 @@ u_int32_t untemper(u_int32_t y)
     return (y);
 }
 
-
+void UnShift_seed(u_int32_t seed)
+{
+	u_int32_t a,b; a = 0; b = 0;
+	int i;
+	///////////////////////////
+	seed_mt(seed);
+	u_int32_t rng[501];
+	for(i=0; i <501;i++)
+		rng[i] = extract_number();
+	u_int32_t M[501];
+	for(i=0; i <501;i++)
+	{
+		M[i] = untemper(rng[i]);
+		printf("untempered[%d] = %u\n",i,M[i]);
+	}
+	for (i=0;i<501;i++)
+	{
+		indx =i;
+		MT[i] = M[i];
+		a = rng[i];
+		b = extract_number();
+		//printf("original : %u || unshifted : %u \n",a,b);
+		if (a != b)
+		{
+			printf("ERROR %d : a = %u et b = %u \n",i,a,b);
+		}
+	}
+}
 
 void UnShift()
 {

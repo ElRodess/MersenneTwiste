@@ -15,6 +15,8 @@ u_int32_t undoLeftShiftXorAnd(u_int32_t y,u_int32_t s,u_int32_t k);
 
 u_int32_t untemper(u_int32_t y);
 
+void UnShift_seed(u_int32_t seed);
+
 void UnShift();
 
 
